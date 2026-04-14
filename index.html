@@ -1,0 +1,121 @@
+<!doctype html>
+
+<html lang='en'>
+
+<head>
+    <meta charset='utf-8'>
+    <title>Color Clock</title>
+    <link rel="stylesheet" href="css/main.css">
+    <style>
+        html,
+        body {
+            height: 100%;
+            margin: 0;
+        }
+
+        div.data {
+            display: flex;
+            flex-direction: row;
+            align-items: stretch;
+            width: 100%;
+        }
+
+        span.color {
+            width: 32%;
+            margin: 1.33% 0.67%;
+            padding: 0.67%;
+            border: 1px solid #262626;
+            text-align: center;
+            font-family: "IBM 3270", "HackMono", "Hack", "Ubuntu Mono", "Consolas", monospace;
+            font-size: 48pt;
+        }
+
+        span.color#timezone {
+            width: 100%;
+        }
+    </style>
+
+    <script>
+        window.onload = function () {
+            window.setInterval(tick, 250)
+        }
+
+        function toIsoString(date) {
+            var tzo = -date.getTimezoneOffset(),
+                dif = tzo >= 0 ? '+' : '-',
+                pad = function (num) {
+                    var norm = Math.floor(Math.abs(num))
+                    return (norm < 10 ? '0' : '') + norm
+                };
+
+            return date.getFullYear() +
+                '-' + pad(date.getMonth() + 1) +
+                '-' + pad(date.getDate()) +
+                'T' + pad(date.getHours()) +
+                ':' + pad(date.getMinutes()) +
+                ':' + pad(date.getSeconds()) +
+                dif + pad(tzo / 60) +
+                ':' + pad(tzo % 60)
+        }
+
+        function tick() {
+            getNow()
+        }
+
+        function getNow() {
+            const now = toIsoString(new Date())
+            const year = { v: now.slice(0, 4), min: 0, max: 1000 }
+            const month = { v: now.slice(5, 7), min: 1, max: 12 }
+            const day = { v: now.slice(8, 10), min: 1, max: 31 }
+            const hour = { v: now.slice(11, 13), min: 0, max: 24 }
+            const minute = { v: now.slice(14, 16), min: 0, max: 60 }
+            const second = { v: now.slice(17, 19), min: 0, max: 60 }
+
+            const secondsSinceEpoch = Math.round(new Date().getTime() / 1000)
+            const data = { year, month, day, hour, minute, second }
+            let val, min, max, hue, elem
+
+            for (let unit in data) {
+                elem = document.getElementById(unit)
+                val = data[unit].v
+                min = data[unit].min
+                max = data[unit].max
+                hue = getHue(val, min, max)
+
+                elem.innerText = ((String(val).length > 1) ? "" : "0") + val
+                elem.style.backgroundColor = `hsl(${hue}, 70%, 30%)`
+                elem.style.color = `hsl(${hue}, 70%, 70%)`
+            }
+
+
+            hue = getHue(secondsSinceEpoch, 0, Number(year.v))
+            elem = document.getElementById("timezone")
+            elem.innerHTML = `(UTC${now.slice(19, 25)})`
+            elem.style.backgroundColor = `hsl(${hue}, 50%, 20%)`
+            elem.style.color = `hsl(${hue}, 50%, 80%)`
+        }
+
+        function getHue(value, min, max) {
+            return Math.round(((value - min) / (max - min)) * 360)
+        }
+
+    </script>
+</head>
+
+<body>
+    <div class="data">
+        <span class='color' id='year'>????</span>
+        <span class='color' id='month'>??</span>
+        <span class='color' id='day'>??</span>
+    </div>
+    <div class="data">
+        <span class='color' id='hour'>??</span>
+        <span class='color' id='minute'>??</span>
+        <span class='color' id='second'>??</span>
+    </div>
+    <div class="data">
+        <span class='color' id='timezone'>(UTC±??:??)</span>
+    </div>
+</body>
+
+</html>
