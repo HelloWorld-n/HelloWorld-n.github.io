@@ -28,6 +28,7 @@
             text-align: center;
             font-family: "IBM 3270", "HackMono", "Hack", "Ubuntu Mono", "Consolas", monospace;
             font-size: 48pt;
+            transition: background-color 1s, color 1s;
         }
 
         span.color#timezone {
@@ -50,14 +51,13 @@
 
         function getNow() {
             const zdt = getZonedNow();
-            const now = zdt.toString({ fractionalSecondDigits: 0, timeZoneName: 'never' });
 
-            const year = { v: now.slice(0, 4), min: 0, max: 1000 }
-            const month = { v: now.slice(5, 7), min: 1, max: 12 }
-            const day = { v: now.slice(8, 10), min: 1, max: 31 }
-            const hour = { v: now.slice(11, 13), min: 0, max: 24 }
-            const minute = { v: now.slice(14, 16), min: 0, max: 60 }
-            const second = { v: now.slice(17, 19), min: 0, max: 60 }
+            const year = { v: zdt.year, min: 0, max: 1000 }
+            const month = { v: zdt.month, min: 1, max: 12 }
+            const day = { v: zdt.day, min: 1, max: 31 }
+            const hour = { v: zdt.hour, min: 0, max: 24 }
+            const minute = { v: zdt.minute, min: 0, max: 60 }
+            const second = { v: zdt.second, min: 0, max: 60 }
 
             const secondsSinceEpoch = Math.round(Date.now() / 1000)
             const data = { year, month, day, hour, minute, second }
