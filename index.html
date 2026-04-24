@@ -49,6 +49,19 @@
             getNow()
         }
 
+        function getTimezoneName(zdt) {
+            const formatter = new Intl.DateTimeFormat(undefined, {
+                timeZone: zdt.timeZoneId,
+                timeZoneName: 'long',
+            })
+
+            const parts = formatter.formatToParts(
+                new Date(zdt.epochMilliseconds)
+            )
+
+            return timezoneName = parts.find(p => p.type === 'timeZoneName').value
+        }
+
         function getNow() {
             const zdt = getZonedNow();
 
@@ -76,7 +89,7 @@
                 elem.style.color = `hsl(${hue}, 70%, 70%)`
             }
 
-            const timezoneName = zdt.timeZoneId;
+            const timezoneName = getTimezoneName(zdt);
             const offset = zdt.offset;
 
             hue = getHue(secondsSinceEpoch, 0, Number(year.v))
