@@ -31,6 +31,10 @@
             transition: background-color 1s, color 1s;
         }
 
+        span.color.smaller {
+            font-size: 32pt;
+        }
+
         span.color#timezone {
             width: 100%;
         }
@@ -50,7 +54,7 @@
         }
 
         function getTimezoneName(zdt) {
-            const formatter = new Intl.DateTimeFormat(undefined, {
+            const formatter = new Intl.DateTimeFormat('en', {
                 timeZone: zdt.timeZoneId,
                 timeZoneName: 'long',
             })
@@ -118,7 +122,7 @@
         <span class='color' id='second'>??</span>
     </div>
     <div class="data">
-        <span class='color' id='timezone'>[???] (UTC±??:??)</span>
+        <span class='color smaller' id='timezone'>[???] (UTC±??:??)</span>
     </div>
 </body>
 
