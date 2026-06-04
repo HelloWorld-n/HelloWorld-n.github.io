@@ -1,129 +1,127 @@
 <!doctype html>
 
-<html lang='en'>
-
-<head>
-    <meta charset='utf-8'>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
     <title>Color Clock</title>
-    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/main.css" />
     <style>
-        html,
-        body {
-            height: 100%;
-            margin: 0;
-        }
+      html,
+      body {
+        height: 100%;
+        margin: 0;
+      }
 
-        div.data {
-            display: flex;
-            flex-direction: row;
-            align-items: stretch;
-            width: 100%;
-        }
+      div.data {
+        display: flex;
+        flex-direction: row;
+        align-items: stretch;
+        width: 100%;
+      }
 
-        span.color {
-            width: 32%;
-            margin: 1.33% 0.67%;
-            padding: 0.67%;
-            border: 1px solid #262626;
-            text-align: center;
-            font-family: "IBM 3270", "HackMono", "Hack", "Ubuntu Mono", "Consolas", monospace;
-            font-size: 48pt;
-            transition: background-color 1s, color 1s;
-        }
+      span.box {
+        width: 32%;
+        margin: 1.33% 0.67%;
+        padding: 0.67%;
+        border: 1px solid #262626;
+        text-align: center;
+        font-family:
+          "IBM 3270", "HackMono", "Hack", "Ubuntu Mono", "Consolas", monospace;
+        font-size: 48pt;
+        transition:
+          background-color 1s,
+          color 1s;
+      }
 
-        span.color.smaller {
-            font-size: 32pt;
-        }
+      span.box.smaller {
+        font-size: 32pt;
+      }
 
-        span.color#timezone {
-            width: 100%;
-        }
+      span.box#timezone {
+        width: 100%;
+      }
     </style>
 
     <script>
-        window.onload = function () {
-            window.setInterval(tick, 250)
+      window.onload = function () {
+        window.setInterval(tick, 250);
+      };
+
+      function getZonedNow() {
+        return Temporal.Now.zonedDateTimeISO();
+      }
+
+      function tick() {
+        getNow();
+      }
+
+      function getTimezoneName(zdt) {
+        const formatter = new Intl.DateTimeFormat("en", {
+          timeZone: zdt.timeZoneId,
+          timeZoneName: "long",
+        });
+
+        const parts = formatter.formatToParts(new Date(zdt.epochMilliseconds));
+
+        return parts.find((p) => p.type === "timeZoneName").value;
+      }
+
+      function getNow() {
+        const zdt = getZonedNow();
+
+        const year = { v: zdt.year, min: 0, max: 1000 };
+        const month = { v: zdt.month, min: 1, max: 12 };
+        const day = { v: zdt.day, min: 1, max: 31 };
+        const hour = { v: zdt.hour, min: 0, max: 24 };
+        const minute = { v: zdt.minute, min: 0, max: 60 };
+        const second = { v: zdt.second, min: 0, max: 60 };
+
+        const secondsSinceEpoch = Math.round(Date.now() / 1000);
+        const data = { year, month, day, hour, minute, second };
+
+        let val, min, max, hue, elem;
+
+        for (let unit in data) {
+          elem = document.getElementById(unit);
+          val = data[unit].v;
+          min = data[unit].min;
+          max = data[unit].max;
+          hue = getHue(val, min, max);
+
+          elem.innerText = (String(val).length > 1 ? "" : "0") + val;
+          elem.style.backgroundColor = `hsl(${hue}, 70%, 30%)`;
+          elem.style.color = `hsl(${hue}, 70%, 70%)`;
         }
 
-        function getZonedNow() {
-            return Temporal.Now.zonedDateTimeISO();
-        }
+        const timezoneName = getTimezoneName(zdt);
+        const offset = zdt.offset;
 
-        function tick() {
-            getNow()
-        }
+        hue = getHue(secondsSinceEpoch, 0, Number(year.v));
+        elem = document.getElementById("timezone");
+        elem.innerHTML = `[${timezoneName}] (UTC${offset})`;
+        elem.style.backgroundColor = `hsl(${hue}, 50%, 20%)`;
+        elem.style.color = `hsl(${hue}, 50%, 80%)`;
+      }
 
-        function getTimezoneName(zdt) {
-            const formatter = new Intl.DateTimeFormat('en', {
-                timeZone: zdt.timeZoneId,
-                timeZoneName: 'long',
-            })
-
-            const parts = formatter.formatToParts(
-                new Date(zdt.epochMilliseconds)
-            )
-
-            return timezoneName = parts.find(p => p.type === 'timeZoneName').value
-        }
-
-        function getNow() {
-            const zdt = getZonedNow();
-
-            const year = { v: zdt.year, min: 0, max: 1000 }
-            const month = { v: zdt.month, min: 1, max: 12 }
-            const day = { v: zdt.day, min: 1, max: 31 }
-            const hour = { v: zdt.hour, min: 0, max: 24 }
-            const minute = { v: zdt.minute, min: 0, max: 60 }
-            const second = { v: zdt.second, min: 0, max: 60 }
-
-            const secondsSinceEpoch = Math.round(Date.now() / 1000)
-            const data = { year, month, day, hour, minute, second }
-
-            let val, min, max, hue, elem
-
-            for (let unit in data) {
-                elem = document.getElementById(unit)
-                val = data[unit].v
-                min = data[unit].min
-                max = data[unit].max
-                hue = getHue(val, min, max)
-
-                elem.innerText = ((String(val).length > 1) ? "" : "0") + val
-                elem.style.backgroundColor = `hsl(${hue}, 70%, 30%)`
-                elem.style.color = `hsl(${hue}, 70%, 70%)`
-            }
-
-            const timezoneName = getTimezoneName(zdt);
-            const offset = zdt.offset;
-
-            hue = getHue(secondsSinceEpoch, 0, Number(year.v))
-            elem = document.getElementById("timezone")
-            elem.innerHTML = `[${timezoneName}] (UTC${offset})`
-            elem.style.backgroundColor = `hsl(${hue}, 50%, 20%)`
-            elem.style.color = `hsl(${hue}, 50%, 80%)`
-        }
-
-        function getHue(value, min, max) {
-            return Math.round(((value - min) / (max - min)) * 360)
-        }
-
+      function getHue(value, min, max) {
+        return Math.round(((value - min) / (max - min)) * 360);
+      }
     </script>
-</head>
+  </head>
 
-<body>
+  <body>
     <div class="data">
-        <span class='color' id='year'>????</span>
-        <span class='color' id='month'>??</span>
-        <span class='color' id='day'>??</span>
+      <span class="box" id="year">????</span>
+      <span class="box" id="month">??</span>
+      <span class="box" id="day">??</span>
     </div>
     <div class="data">
-        <span class='color' id='hour'>??</span>
-        <span class='color' id='minute'>??</span>
-        <span class='color' id='second'>??</span>
+      <span class="box" id="hour">??</span>
+      <span class="box" id="minute">??</span>
+      <span class="box" id="second">??</span>
     </div>
     <div class="data">
-        <span class='color smaller' id='timezone'>[???] (UTC±??:??)</span>
+      <span class="box smaller" id="timezone">[???] (UTC±??:??)</span>
     </div>
-</body>
-
+  </body>
 </html>
