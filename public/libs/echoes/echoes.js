@@ -5,7 +5,7 @@ export function prepareEchoElements() {
     try {
       const echoData = {
         n: 1,
-        ...JSON.parse($box.getAttribute("data-echo")),
+        ...JSON.parse($box.getAttribute("data-echo") ?? "{}"),
       };
 
       const $echos = ((id) => {
