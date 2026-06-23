@@ -1,14 +1,14 @@
-import { pixelsPerEm } from "../conversion/distance.js";
+import { pixelsPerEm } from "../conversion/distance";
 
 export function prepareEchoElements() {
   for (const $box of document.querySelectorAll("[id][data-echo]")) {
     try {
       const echoData = {
         n: 1,
-        ...JSON.parse($box.getAttribute("data-echo")),
+        ...JSON.parse($box.getAttribute("data-echo") ?? "{}"),
       };
 
-      const $echos = ((id) => {
+      const $echos = ((id: string) => {
         const $existing = document.querySelector(`[data-echo-of='${id}']`);
         if ($existing) {
           return $existing;
@@ -16,15 +16,14 @@ export function prepareEchoElements() {
         const $new = document.createElement("span");
         $new.setAttribute("data-echo-of", id);
         $new.style.setProperty("border", "0");
-        console.info($new);
         return $new;
-      })($box.getAttribute("id"));
+      })($box.getAttribute("id")!);
 
       while ($echos.querySelectorAll(`.echo`).length < echoData.n) {
-        const $echo = $box.cloneNode();
+        const $echo = $box.cloneNode() as HTMLElement;
         $echo.removeAttribute("id");
         $echo.classList.add("echo");
-        $echo.style.setProperty("z-index", -1);
+        $echo.style.setProperty("z-index", "-1");
         $echo.innerHTML = "";
         $echos.insertBefore($echo, null);
       }
@@ -34,8 +33,17 @@ export function prepareEchoElements() {
     }
   }
 }
-export function moveEchoRandomDir($echo, { updateStyles = [] } = {}) {
-  const $orig = $echo.parentNode.parentNode;
+export function moveEchoRandomDir(
+  $echo: HTMLElement,
+  { updateStyles = [] }: { updateStyles?: Array<string> } = {},
+) {  const $orig =
+    ($echo.closest('[data-echo-origin="true"]') as HTMLElement | null) ??
+    ($echo.parentElement?.parentElement as HTMLElement | null);
+
+  if (!$orig) {
+    console.warn('moveEchoRandomDir: unable to resolve echo origin element', $echo);
+    return;
+  }
   const rect = $orig.getBoundingClientRect();
   rect.x += window.scrollX;
   rect.y += window.scrollY;
