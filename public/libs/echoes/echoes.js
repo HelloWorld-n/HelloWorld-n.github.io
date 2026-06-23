@@ -16,7 +16,6 @@ export function prepareEchoElements() {
         const $new = document.createElement("span");
         $new.setAttribute("data-echo-of", id);
         $new.style.setProperty("border", "0");
-        console.info($new);
         return $new;
       })($box.getAttribute("id"));
 

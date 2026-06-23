@@ -1,10 +1,6 @@
-import React from "react";
+import React, { useEffect } from "react";
 
 import { prepareEchoElements, moveEchoRandomDir } from "../libs/echoes/echoes";
-
-window.onload = function (): void {
-  window.setInterval(tick, 250);
-};
 
 function getZonedNow(): Temporal.ZonedDateTime {
   return Temporal.Now.zonedDateTimeISO();
@@ -53,7 +49,11 @@ function getNow(): void {
   const secondsSinceEpoch: number = Math.round(Date.now() / 1000);
   const data: TimeData = { year, month, day, hour, minute, second };
 
-  let val: number, min: number, max: number, hue: number, $elem: HTMLElement | null;
+  let val: number,
+    min: number,
+    max: number,
+    hue: number,
+    $elem: HTMLElement | null;
 
   for (let unit in data) {
     $elem = document.getElementById(unit);
@@ -65,8 +65,10 @@ function getNow(): void {
     hue = getHue(val, min, max);
 
     const textElem = $elem.querySelector(".text");
-    if (textElem) textElem.textContent = (String(val).length > 1 ? "" : "0") + String(val);
-    ($elem.style as CSSStyleDeclaration).backgroundColor = `hsl(${hue}, 70%, 30%)`;
+    if (textElem)
+      textElem.textContent = (String(val).length > 1 ? "" : "0") + String(val);
+    ($elem.style as CSSStyleDeclaration).backgroundColor =
+      `hsl(${hue}, 70%, 30%)`;
     ($elem.style as CSSStyleDeclaration).color = `hsl(${hue}, 70%, 70%)`;
   }
 
@@ -78,7 +80,8 @@ function getNow(): void {
   if ($elem) {
     const textElem = $elem.querySelector(".text");
     if (textElem) textElem.textContent = `[${timezoneName}] (UTC${offset})`;
-    ($elem.style as CSSStyleDeclaration).backgroundColor = `hsl(${hue}, 50%, 20%)`;
+    ($elem.style as CSSStyleDeclaration).backgroundColor =
+      `hsl(${hue}, 50%, 20%)`;
     ($elem.style as CSSStyleDeclaration).color = `hsl(${hue}, 50%, 80%)`;
   }
 }
@@ -101,6 +104,12 @@ setInterval(() => {
 }, 30);
 
 export function ColorClock() {
+  useEffect((): (() => void) => {
+    const intervalId = window.setInterval(tick, 250);
+    return () => {
+      window.clearInterval(intervalId);
+    };
+  }, []);
   return (
     <>
       <div className="data">

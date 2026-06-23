@@ -16,7 +16,6 @@ export function prepareEchoElements() {
         const $new = document.createElement("span");
         $new.setAttribute("data-echo-of", id);
         $new.style.setProperty("border", "0");
-        console.info($new);
         return $new;
       })($box.getAttribute("id")!);
 
@@ -37,8 +36,14 @@ export function prepareEchoElements() {
 export function moveEchoRandomDir(
   $echo: HTMLElement,
   { updateStyles = [] }: { updateStyles?: Array<string> } = {},
-) {
-  const $orig = $echo?.parentNode?.parentNode as HTMLElement;
+) {  const $orig =
+    ($echo.closest('[data-echo-origin="true"]') as HTMLElement | null) ??
+    ($echo.parentElement?.parentElement as HTMLElement | null);
+
+  if (!$orig) {
+    console.warn('moveEchoRandomDir: unable to resolve echo origin element', $echo);
+    return;
+  }
   const rect = $orig.getBoundingClientRect();
   rect.x += window.scrollX;
   rect.y += window.scrollY;
