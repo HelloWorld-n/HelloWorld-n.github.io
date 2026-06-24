@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 
 import { prepareEchoElements, moveEchoRandomDir } from "../libs/echoes/echoes";
 
-function getZonedNow(): Temporal.ZonedDateTime {
+export function getZonedNow(): Temporal.ZonedDateTime {
   return Temporal.Now.zonedDateTimeISO();
 }
 
@@ -10,7 +10,7 @@ function tick(): void {
   getNow();
 }
 
-function getTimezoneName(zdt: Temporal.ZonedDateTime): string {
+export function getTimezoneName(zdt: Temporal.ZonedDateTime): string {
   const formatter = new Intl.DateTimeFormat("en", {
     timeZone: zdt.timeZoneId,
     timeZoneName: "long",
