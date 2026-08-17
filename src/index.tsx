@@ -4,6 +4,7 @@ import { HashRouter, Routes, Route, Navigate, Link } from "react-router-dom";
 
 import { ColorClock, getTimezoneName } from "./ColorClock/ColorClock";
 import { getZonedNow } from "./ColorClock/ColorClock";
+import { RunicSirkles } from "./RunicSirkles/RunicSirkles";
 
 const root = createRoot(document.getElementById("root") as HTMLElement);
 
@@ -25,10 +26,15 @@ function App() {
 
   return (
     <HashRouter>
-      <nav></nav>
+      <nav style={{ display: "flex", gap: "1rem", justifyContent: "center"}}>
+        <Link to="/color-clock">Color Clock</Link>
+        <Link to="/runic-sirkles">Runic Sirkles</Link>
+      </nav>
+      <br/>
       <Routes>
         <Route path="/" element={<Navigate to="/color-clock" />} />
         <Route path="/color-clock" element={<ColorClock />} />
+        <Route path="/runic-sirkles" element={<RunicSirkles />} />
         <Route
           path="*"
           element={
