@@ -1,5 +1,5 @@
 import React from "react";
-import { RunicRune } from "./RunicBaseComponents";
+import { RunicRune, splitTextIntoRunes } from "./RunicBaseComponents";
 
 export function RunesForText(data: {
   text: string;
@@ -9,7 +9,7 @@ export function RunesForText(data: {
   const spacing = 60;
   return (
     <svg style={{ backgroundColor: data.backgroundColor ?? "#22113322", width: "100%", height: "100%" }}>
-      {data.text.split("").map((value, index) => (
+      {splitTextIntoRunes(data.text).map((value, index) => (
         <g 
           key={index} 
           transform={`translate(${index * spacing}, 20)`} 
