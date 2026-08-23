@@ -283,7 +283,6 @@ export const splitTextIntoRunes = (text: string): (string | DiactricRune)[] => {
   const applyDiactrics = () => {
     for (const diactric of diactrics) {
       result.push(diactric);
-      console.info(result);
     }
     diactrics = [];
   };
