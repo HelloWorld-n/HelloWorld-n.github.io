@@ -289,18 +289,26 @@ export const splitTextIntoRunes = (text: string): (string | DiactricRune)[] => {
   };
 
   const applyRune = () => {
-    result.push(currentRune);
+    if (currentRune) {
+      result.push(currentRune);
+    }
     currentRune = ``;
     stem = undefined;
     runePos = 0;
-    applyDiactrics();
   };
 
   for (let char of textArray) {
     const runeInfo = runeData[char];
 
     if (runeInfo?.type === DIACTRIC) {
-      diactrics.push({ ...runeInfo, pos: runePos as 0 | 1 | 2 });
+      let diactricPos = (runePos + 2) % 3;
+      const previousResult = result.at(-1);
+      if (typeof previousResult === 'string' && ['x', 'b', 'j'].includes(previousResult)) {
+        diactricPos = 0;
+      }
+      diactrics.push({ ...runeInfo, pos: diactricPos as 0 | 1 | 2 });
+      applyRune();
+      applyDiactrics();
       continue;
     }
 
