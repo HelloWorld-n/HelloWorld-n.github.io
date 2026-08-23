@@ -10,9 +10,9 @@ export function RunesForText(data: {
   return (
     <svg style={{ backgroundColor: data.backgroundColor ?? "#22113322", width: "100%", height: "100%" }}>
       {splitTextIntoRunes(data.text).map((value, index) => (
-        <g 
-          key={index} 
-          transform={`translate(${index * spacing}, 20)`} 
+        <g
+          key={index}
+          transform={`translate(${index * spacing}, 20)`}
           data-value={value}
         >
           <RunicRune rune={value} color={data.color ?? "#CCAADD"} />

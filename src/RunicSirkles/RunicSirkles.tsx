@@ -12,7 +12,7 @@ export const RunicSirkles = function () {
         onChange={(e) => setText(e.target.value)}
       />
       <br />
-      <RunesForText text={text.toLowerCase()} />
+      <RunesForText text={text.toLowerCase()} /> 
     </div>
   );
 };
