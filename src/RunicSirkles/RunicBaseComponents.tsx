@@ -296,13 +296,16 @@ export const splitTextIntoRunes = (text: string): (string | DiactricRune)[] => {
     runePos = 0;
   };
 
-  for (let char of textArray) {
+  for (const char of textArray) {
     const runeInfo = runeData[char];
 
     if (runeInfo?.type === DIACTRIC) {
       let diactricPos = (runePos + 2) % 3;
       const previousResult = result.at(-1);
-      if (typeof previousResult === 'string' && ['x', 'b', 'j'].includes(previousResult)) {
+      if (
+        typeof previousResult === 'string' &&
+        ['x', 'b', 'j'].includes(previousResult)
+      ) {
         diactricPos = 0;
       }
       diactrics.push({ ...runeInfo, pos: diactricPos as 0 | 1 | 2 });
@@ -356,15 +359,15 @@ export const splitTextIntoRunes = (text: string): (string | DiactricRune)[] => {
   return result;
 };
 
-export const RunicLetter = function (data: {
+export const RunicLetter = (data: {
   rune: string;
   color: string;
-}): React.ReactElement {
+}): React.ReactElement => {
   const result = [];
   if (data.rune.length === 0 || !runeData[data.rune?.[0]]) {
     return <></>;
   }
-  for (let char of data.rune) {
+  for (const char of data.rune) {
     if (runeData[char] !== undefined) {
       result.push(<FullLine color={data.color} />);
     }
@@ -392,7 +395,7 @@ export const RunicLetter = function (data: {
 
   result.push(<Stem stem={stem} color={data.color} />);
 
-  for (let char of data.rune) {
+  for (const char of data.rune) {
     result.push(
       <g>
         {runeData[char]?.modifier === 'e' ? (
@@ -539,10 +542,10 @@ export const RunicLetter = function (data: {
   return <>{result}</>;
 };
 
-export const RunicDiactric = function (data: {
+export const RunicDiactric = (data: {
   rune: DiactricRune;
   color: string;
-}): React.ReactElement {
+}): React.ReactElement => {
   const result = [];
   result.push(<FullLine color={data.color} />);
   if (['th', 'u', 'a', 'i'].includes(data.rune.modifier)) {
