@@ -13,7 +13,7 @@ export function RunesForText(data: {
         <g
           key={index}
           transform={`translate(${index * spacing}, 20)`}
-          data-value={value}
+          data-value={JSON.stringify(value)}
         >
           <RunicRune rune={value} color={data.color ?? "#CCAADD"} />
         </g>

@@ -2,6 +2,7 @@ import React from 'react';
 
 const LETTER = Symbol('LETTER');
 const DIACTRIC = Symbol('DIACTRIC');
+const SYLLABLE = Symbol('SYLLABLE');
 
 type StemType = 'x' | 'b' | 'j';
 
@@ -10,6 +11,7 @@ type LetterRune = {
   stem: StemType | 'dplc';
   modifier: 'th' | 'a' | 'e' | 'i' | 'o' | 'u' | 's';
 };
+
 
 type DiactricRune = {
   type: typeof DIACTRIC;
@@ -20,6 +22,12 @@ type DiactricRune = {
 };
 
 type BasicRune = LetterRune | DiactricRune;
+
+type SyllableRune = {
+  type: typeof SYLLABLE;
+  text: string;
+  first: boolean;
+}
 
 export const runeData: { [glyph: string]: BasicRune } = {
   'x': {
@@ -219,6 +227,51 @@ export const runeData: { [glyph: string]: BasicRune } = {
   },
 };
 
+function StartingLine({ color }: { color: string }): React.ReactElement {
+  return (
+    <path
+      style={{ stroke: color, fill: '#00000000' }}
+      d="M 10,5 60,5"
+      data-__label_internal__="line"
+    />
+  );
+}
+
+
+function StartingStem(data: { stem: BasicRune['stem']; color: string }): any {
+  return (
+    <>
+      {data.stem === 'x' ? (
+        <path
+          style={{ stroke: data.color, fill: '#00000000' }}
+          d="M 10.0,5.0 8.9,23.5"
+          data-__label_internal__="stem_x"
+        />
+      ) : (
+        <></>
+      )}
+      {data.stem === 'b' ? (
+        <path
+          style={{ stroke: data.color, fill: '#00000000' }}
+          d="M 10.0,5.0 7.1,23.6 15.5,22.3"
+          data-__label_internal__="stem_b"
+        />
+      ) : (
+        <></>
+      )}
+      {data.stem === 'j' ? (
+        <path
+          style={{ stroke: data.color, fill: '#00000000' }}
+          d="m 10.0,-10.0 0.0,50.0"
+          data-__label_internal__="stem_j"
+        />
+      ) : (
+        <></>
+      )}
+    </>
+  );
+}
+
 function FullLine({ color }: { color: string }): React.ReactElement {
   return (
     <path
@@ -263,13 +316,13 @@ function Stem(data: { stem: BasicRune['stem']; color: string }): any {
   );
 }
 
-export const splitTextIntoRunes = (text: string): (string | DiactricRune)[] => {
+export const splitTextIntoRunes = (text: string): (SyllableRune | DiactricRune)[] => {
   const textArray = text
-    .toLowerCase()
-    .normalize('NFD')
-    .normalize('NFKD')
-    .split('');
-  const result: (string | DiactricRune)[] = [];
+  .toLowerCase()
+  .normalize('NFD')
+  .normalize('NFKD')
+  .split('');
+  const result: (SyllableRune | DiactricRune)[] = [];
   const posFns: ((rune: LetterRune) => boolean)[] = [
     rune => rune.stem !== 'dplc' && !['e', 's'].includes(rune.modifier),
     rune => rune.stem === 'dplc',
@@ -277,9 +330,13 @@ export const splitTextIntoRunes = (text: string): (string | DiactricRune)[] => {
   ];
   let stem = undefined;
   let runePos: 0 | 1 | 2 = 0;
-  let currentRune = ``;
+  let currentRune: SyllableRune = {
+    type: SYLLABLE,
+    text: ``,
+    first: true,
+  };
   let diactrics: DiactricRune[] = [];
-
+  
   const applyDiactrics = () => {
     for (const diactric of diactrics) {
       result.push(diactric);
@@ -289,9 +346,10 @@ export const splitTextIntoRunes = (text: string): (string | DiactricRune)[] => {
 
   const applyRune = () => {
     if (currentRune) {
-      result.push(currentRune);
+      result.push({...currentRune});
     }
-    currentRune = ``;
+    currentRune.text = ``;
+    currentRune.first = false;
     stem = undefined;
     runePos = 0;
   };
@@ -316,8 +374,9 @@ export const splitTextIntoRunes = (text: string): (string | DiactricRune)[] => {
 
     if ([' ', '\t', '\n', '\r'].includes(char)) {
       applyRune();
-      currentRune = ` `;
+      currentRune.text = ` `;
       applyRune();
+      currentRune.first = true;
       continue;
     }
 
@@ -338,7 +397,7 @@ export const splitTextIntoRunes = (text: string): (string | DiactricRune)[] => {
       }
     }
 
-    currentRune = `${currentRune}${char}`;
+    currentRune.text = `${currentRune.text}${char}`;
     if (runeInfo.stem !== 'dplc') {
       stem = runeInfo.stem;
     }
@@ -360,16 +419,20 @@ export const splitTextIntoRunes = (text: string): (string | DiactricRune)[] => {
 };
 
 export const RunicLetter = (data: {
-  rune: string;
+  rune: SyllableRune;
   color: string;
 }): React.ReactElement => {
   const result = [];
-  if (data.rune.length === 0 || !runeData[data.rune?.[0]]) {
+  if (data.rune.text.length === 0 || !runeData[data.rune.text?.[0]]) {
     return <></>;
   }
-  for (const char of data.rune) {
+  for (const char of data.rune.text) {
     if (runeData[char] !== undefined) {
-      result.push(<FullLine color={data.color} />);
+      if (data.rune.first) {
+        result.push(<StartingLine color={data.color} />)
+      } else {
+        result.push(<FullLine color={data.color} />);
+      }
     }
     if (['th', 'u', 'a', 'i'].includes(runeData[char]?.modifier)) {
       result.push(
@@ -386,16 +449,20 @@ export const RunicLetter = (data: {
   }
 
   let stem: StemType = 'x';
-  for (const char of data.rune) {
+  for (const char of data.rune.text) {
     if (['x', 'b', 'j'].includes(runeData[char].stem)) {
       stem = runeData[char].stem as StemType;
       break;
     }
   }
 
-  result.push(<Stem stem={stem} color={data.color} />);
+  if (data.rune.first) {
+    result.push(<StartingStem stem={stem} color={data.color} />)
+  } else {
+    result.push(<Stem stem={stem} color={data.color} />);
+  }
 
-  for (const char of data.rune) {
+  for (const char of data.rune.text) {
     result.push(
       <g>
         {runeData[char]?.modifier === 'e' ? (
@@ -660,10 +727,10 @@ export const RunicDiactric = (data: {
 };
 
 export const RunicRune = (data: {
-  rune: string | DiactricRune;
+  rune: SyllableRune | DiactricRune;
   color: string;
 }): React.ReactElement => {
-  if (typeof data.rune === 'string') {
+  if (data.rune.type === SYLLABLE) {
     return <RunicLetter rune={data.rune} color={data.color} />;
   }
   if (data.rune.type === DIACTRIC) {
